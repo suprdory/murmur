@@ -1,0 +1,18 @@
+/* body {
+    background-color: rgb(48, 48, 48);
+}
+
+canvas {
+    border: 1px solid rgb(62, 50, 126);
+} */
+
+#cw {
+  position: fixed;
+  z-index: -1;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: rgba(0, 0, 0, 0.05);
+}
