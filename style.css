@@ -9,6 +9,7 @@ canvas {
 #cw {
   position: fixed;
   z-index: -1;
+  cursor: crosshair;
 }
 
 body {

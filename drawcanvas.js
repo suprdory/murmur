@@ -14,13 +14,40 @@ const cursor = {
     y: innerHeight / 2,
 };
 
+class Particle {
+    constructor(x, y, particleTrailWidth, strokeColor, rotateSpeed) {
+        this.x = x;
+        this.y = y;
+        this.particleTrailWidth = particleTrailWidth;
+        this.strokeColor = strokeColor;
+        this.theta = Math.random() * Math.PI * 2;
+        this.rotateSpeed = rotateSpeed;
+        this.t = Math.random() * 150;
+
+        this.rotate = () => {
+            const ls = {
+                x: this.x,
+                y: this.y,
+            };
+            this.theta += this.rotateSpeed;
+            this.x = cursor.x + Math.cos(this.theta) * this.t;
+            this.y = cursor.y + Math.sin(this.theta) * this.t;
+            context.beginPath();
+            context.lineWidth = this.particleTrailWidth;
+            context.strokeStyle = this.strokeColor;
+            context.moveTo(ls.x, ls.y);
+            context.lineTo(this.x, this.y);
+            context.stroke();
+        };
+    }
+}
 let particlesArray = [];
 
 generateParticles(101);
 setSize();
 anim();
 
-addEventListener("mousemove", (e) => {
+addEventListener("click", (e) => {
     cursor.x = e.clientX;
     cursor.y = e.clientY;
 });
@@ -63,31 +90,6 @@ function setSize() {
     canvas.width = innerWidth;
 }
 
-function Particle(x, y, particleTrailWidth, strokeColor, rotateSpeed) {
-    this.x = x;
-    this.y = y;
-    this.particleTrailWidth = particleTrailWidth;
-    this.strokeColor = strokeColor;
-    this.theta = Math.random() * Math.PI * 2;
-    this.rotateSpeed = rotateSpeed;
-    this.t = Math.random() * 150;
-
-    this.rotate = () => {
-        const ls = {
-            x: this.x,
-            y: this.y,
-        };
-        this.theta += this.rotateSpeed;
-        this.x = cursor.x + Math.cos(this.theta) * this.t;
-        this.y = cursor.y + Math.sin(this.theta) * this.t;
-        context.beginPath();
-        context.lineWidth = this.particleTrailWidth;
-        context.strokeStyle = this.strokeColor;
-        context.moveTo(ls.x, ls.y);
-        context.lineTo(this.x, this.y);
-        context.stroke();
-    };
-}
 
 function anim() {
     requestAnimationFrame(anim);
