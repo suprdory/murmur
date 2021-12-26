@@ -7,11 +7,15 @@ const cursor = {
     y: innerHeight / 2,
 };
 
+
+
+let mouseDown = false
 const nP = 1000
 const dt = 1.0
 const du = 0.1
 const dthmax=0.1
 const edgeWidth = 0.3
+
 class Particle {
     constructor(strokeColor) {
         this.V=Math.random()*5+2
@@ -60,51 +64,94 @@ class Particle {
         }
     }
         
-        detectEdgeRotate() {
-            let x = this.x
-            let y = this.y
-            let x2 = this.u
-            let y2 = this.v
-            let x1 = innerWidth/2-x
-            let y1 = innerHeight/2-y
+    detectEdgeRotate() {
+        let x = this.x
+        let y = this.y
+        let x2 = this.u
+        let y2 = this.v
+        let x1 = innerWidth/2-x
+        let y1 = innerHeight/2-y
 
-            if ( 
-                x > innerWidth * (1 - edgeWidth) ||  
-                x < innerWidth * edgeWidth || 
-                y > innerHeight * (1 - edgeWidth) || 
-                y < innerHeight * edgeWidth
-                ) 
-            {
-                let Dth=Math.atan2(x1*y2-y1*x2,x1*x2+y1*y2)
-                let dth=0.010*Dth
-                if (Math.abs(dth) > dthmax) {
-                    // console.log('exceed!')
-                    dth=dthmax*Math.sign(dth)
-                }
-                this.theta=this.theta+dth
-                this.u = this.V*Math.sin(this.theta);
-                this.v = this.V*Math.cos(this.theta);
+        if ( 
+            x > innerWidth * (1 - edgeWidth) ||  
+            x < innerWidth * edgeWidth || 
+            y > innerHeight * (1 - edgeWidth) || 
+            y < innerHeight * edgeWidth
+            ) 
+        {
+            let Dth=Math.atan2(x1*y2-y1*x2,x1*x2+y1*y2)
+            let dth=0.01*Dth
+            if (Math.abs(dth) > dthmax) {
+                // console.log('exceed!')
+                dth=dthmax*Math.sign(dth)
             }
+            this.theta=this.theta+dth
+            this.u = this.V*Math.sin(this.theta);
+            this.v = this.V*Math.cos(this.theta);
+        }
+}
+    trackCursor() {
+        let x2 = this.u
+        let y2 = this.v
+        let x1 = cursor.x-this.x
+        let y1 = cursor.y-this.y
+        let dth=Math.atan2(x1*y2-y1*x2,x1*x2+y1*y2)
+        this.theta=this.theta+dth*0.01
+        this.u = this.V*Math.sin(this.theta);
+        this.v = this.V*Math.cos(this.theta);
     }
 }
 
 
+addEventListener('mousedown', e => {
+    cursor.x = e.offsetX;
+    cursor.y = e.offsetY;
+    mouseDown = true;
+});
+  
+addEventListener('mousemove', e => {
+    cursor.x = e.offsetX;
+    cursor.y = e.offsetY;
+    x = e.offsetX;
+    y = e.offsetY;
+});
+  
+addEventListener('mouseup', e => {
+    mouseDown = false;
+});
+
+addEventListener(
+    "touchstart",
+    (e) => {
+        e.preventDefault();
+        cursor.x = e.touches[0].clientX;
+        cursor.y = e.touches[0].clientY;
+        mouseDown = true;
+    },
+    { passive: false }
+);
+
+addEventListener(
+    "touchmove",
+    (e) => {
+        e.preventDefault();
+        cursor.x = e.touches[0].clientX;
+        cursor.y = e.touches[0].clientY;
+    },
+    { passive: false }
+);
+
+addEventListener(
+    "touchend",
+    (e) => {
+        e.preventDefault();
+        mouseDown = false;
+    },
+    { passive: false }
+);
 
 
-// addEventListener("click", (e) => {
-//     cursor.x = e.clientX;
-//     cursor.y = e.clientY;
-// });
 
-// addEventListener(
-//     "touchmove",
-//     (e) => {
-//         e.preventDefault();
-//         cursor.x = e.touches[0].clientX;
-//         cursor.y = e.touches[0].clientY;
-//     },
-//     { passive: false }
-// );
 
 addEventListener("resize", () => setSize());
 
@@ -144,9 +191,12 @@ function anim() {
     context.fillStyle = "rgba(0,0,0,0.05)";
     context.fillRect(0, 0, canvas.width, canvas.height);
 
-    particlesArray.forEach((particle) => particle.move());
-    particlesArray.forEach((particle) => particle.draw());
-    particlesArray.forEach((particle) => particle.detectEdgeRotate());
+    particlesArray.forEach((particle) => particle.move())
+    particlesArray.forEach((particle) => particle.draw())
+    particlesArray.forEach((particle) => particle.detectEdgeRotate())
+    if ( mouseDown ) {
+        particlesArray.forEach((particle) => particle.trackCursor())
+    }
 }
 
 
