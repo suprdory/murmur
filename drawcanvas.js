@@ -7,23 +7,23 @@ const cursor = {
     y: innerHeight / 2,
 };
 
-const dt = 0.1
-const dx = 1
-const du = 1
+const dt = 1.0
+const du = 0.1
 const edgeWidth = 0.1
 class Particle {
-    constructor(x, y, u, v, strokeColor, rotateSpeed) {
-        this.x = x + randn_bm() * 50;
-        this.y = y + randn_bm() * 50;
-        this.u = u + randn_bm() * 10;
-        this.v = v + randn_bm() * 10;
+    constructor(strokeColor) {
+        this.V=Math.random()*5+2
+        this.theta=Math.random()*2*Math.PI
+        this.x = cursor.x + randn_bm() * 100;
+        this.y = cursor.y + randn_bm() * 100;
+        this.u = this.V*Math.sin(this.theta);
+        this.v = this.V*Math.cos(this.theta);
         this.size = 20;
         this.alpha = 10 * Math.PI / 180;
         this.strokeColor = strokeColor;
         this.fillColor = strokeColor;
         this.theta = Math.atan2(this.v,this.u);
-        this.rotateSpeed = rotateSpeed;
-        this.t = Math.random() * 150;
+
     }
     move()  {
         this.x = this.x + this.u*  dt;
@@ -61,36 +61,29 @@ class Particle {
 }
 
 
-generateParticles(100);
-setSize();
-anim();
 
-addEventListener("click", (e) => {
-    cursor.x = e.clientX;
-    cursor.y = e.clientY;
-});
 
-addEventListener(
-    "touchmove",
-    (e) => {
-        e.preventDefault();
-        cursor.x = e.touches[0].clientX;
-        cursor.y = e.touches[0].clientY;
-    },
-    { passive: false }
-);
+// addEventListener("click", (e) => {
+//     cursor.x = e.clientX;
+//     cursor.y = e.clientY;
+// });
+
+// addEventListener(
+//     "touchmove",
+//     (e) => {
+//         e.preventDefault();
+//         cursor.x = e.touches[0].clientX;
+//         cursor.y = e.touches[0].clientY;
+//     },
+//     { passive: false }
+// );
 
 addEventListener("resize", () => setSize());
 
 function generateParticles(amount) {
     for (let i = 0; i < amount; i++) {
         particlesArray[i] = new Particle(
-            innerWidth / 2,
-            innerHeight / 2,
-            5,
-            5,
             generateColor(),
-            0.02
         );
     }
 }
@@ -120,11 +113,14 @@ function randn_bm() {
 
 function anim() {
     requestAnimationFrame(anim);
-
-    context.fillStyle = "rgba(0,0,0,1.0)";
+    context.fillStyle = "rgba(0,0,0,0.1)";
     context.fillRect(0, 0, canvas.width, canvas.height);
 
     particlesArray.forEach((particle) => particle.move());
     particlesArray.forEach((particle) => particle.draw());
     particlesArray.forEach((particle) => particle.detectEdge());
 }
+
+generateParticles(100);
+setSize();
+anim();
