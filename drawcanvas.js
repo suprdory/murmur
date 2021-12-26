@@ -7,8 +7,10 @@ const cursor = {
     y: innerHeight / 2,
 };
 
+const nP = 1000
 const dt = 1.0
 const du = 0.1
+const dthmax=0.1
 const edgeWidth = 0.1
 class Particle {
     constructor(strokeColor) {
@@ -56,7 +58,33 @@ class Particle {
         if ( this.y < innerHeight * edgeWidth){
             this.v = this.v + du
         }
+    }
+        
+        detectEdgeRotate() {
+            let x = this.x
+            let y = this.y
+            let x2 = this.u
+            let y2 = this.v
+            let x1 = innerWidth/2-x
+            let y1 = innerHeight/2-y
 
+            if ( 
+                x > innerWidth * (1 - edgeWidth) ||  
+                x < innerWidth * edgeWidth || 
+                y > innerHeight * (1 - edgeWidth) || 
+                y < innerHeight * edgeWidth
+                ) 
+            {
+                let Dth=Math.atan2(x1*y2-y1*x2,x1*x2+y1*y2)
+                let dth=0.010*Dth
+                if (Math.abs(dth) > dthmax) {
+                    // console.log('exceed!')
+                    dth=dthmax*Math.sign(dth)
+                }
+                this.theta=this.theta+dth
+                this.u = this.V*Math.sin(this.theta);
+                this.v = this.V*Math.cos(this.theta);
+            }
     }
 }
 
@@ -113,14 +141,15 @@ function randn_bm() {
 
 function anim() {
     requestAnimationFrame(anim);
-    context.fillStyle = "rgba(0,0,0,0.1)";
+    context.fillStyle = "rgba(0,0,0,0.05)";
     context.fillRect(0, 0, canvas.width, canvas.height);
 
     particlesArray.forEach((particle) => particle.move());
     particlesArray.forEach((particle) => particle.draw());
-    particlesArray.forEach((particle) => particle.detectEdge());
+    particlesArray.forEach((particle) => particle.detectEdgeRotate());
 }
 
-generateParticles(100);
+
+generateParticles(nP);
 setSize();
 anim();
