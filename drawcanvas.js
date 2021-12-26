@@ -8,7 +8,7 @@ const cursor = {
 };
 
 
-
+let lastTouch = new Date().getTime();
 let mouseDown = false
 const nP = 1000
 const dt = 1.0
@@ -96,12 +96,16 @@ class Particle {
         let x1 = cursor.x-this.x
         let y1 = cursor.y-this.y
         let dth=Math.atan2(x1*y2-y1*x2,x1*x2+y1*y2)
-        this.theta=this.theta+dth*0.01
+        this.theta=this.theta+dth*0.03
+        this.u = this.V*Math.sin(this.theta);
+        this.v = this.V*Math.cos(this.theta);
+    }
+    scatter() {
+        this.theta=Math.random()*2*Math.PI
         this.u = this.V*Math.sin(this.theta);
         this.v = this.V*Math.cos(this.theta);
     }
 }
-
 
 addEventListener('mousedown', e => {
     cursor.x = e.offsetX;
@@ -120,10 +124,22 @@ addEventListener('mouseup', e => {
     mouseDown = false;
 });
 
+addEventListener('dblclick', e => {
+    particlesArray.forEach((particle) => particle.scatter())
+});
+
 addEventListener(
     "touchstart",
     (e) => {
         e.preventDefault();
+        let now = new Date().getTime();
+        let timeSince = now - lastTouch;
+ 
+        if (timeSince < 300) {
+            //double touch
+            particlesArray.forEach((particle) => particle.scatter()) 
+        }
+        lastTouch = new Date().getTime()
         cursor.x = e.touches[0].clientX;
         cursor.y = e.touches[0].clientY;
         mouseDown = true;
@@ -149,7 +165,6 @@ addEventListener(
     },
     { passive: false }
 );
-
 
 
 
