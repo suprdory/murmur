@@ -11,7 +11,7 @@ const nP = 1000
 const dt = 1.0
 const du = 0.1
 const dthmax=0.1
-const edgeWidth = 0.1
+const edgeWidth = 0.3
 class Particle {
     constructor(strokeColor) {
         this.V=Math.random()*5+2
