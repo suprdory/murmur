@@ -17,7 +17,7 @@ const dthmax=0.1
 const edgeWidth = 0.3
 
 class Particle {
-    constructor(strokeColor) {
+    constructor() {
         this.V=Math.random()*5+2
         this.theta=Math.random()*2*Math.PI
         this.x = cursor.x + randn_bm() * 100;
@@ -26,11 +26,11 @@ class Particle {
         this.v = this.V*Math.cos(this.theta);
         this.size = 20;
         this.alpha = 10 * Math.PI / 180;
-        this.strokeColor = strokeColor;
-        this.fillColor = strokeColor;
+        this.fillColor = 0;
         this.theta = Math.atan2(this.v,this.u);
 
     }
+
     move()  {
         this.x = this.x + this.u*  dt;
         this.y = this.y + this.v * dt;
@@ -105,12 +105,17 @@ class Particle {
         this.u = this.V*Math.sin(this.theta);
         this.v = this.V*Math.cos(this.theta);
     }
+    setColor(newColor) {
+        this.fillColor=newColor
+    }
 }
 
 addEventListener('mousedown', e => {
     cursor.x = e.offsetX;
     cursor.y = e.offsetY;
     mouseDown = true;
+    noDouble = false;
+    lastTouch = new Date().getTime();
 });
   
 addEventListener('mousemove', e => {
@@ -125,7 +130,13 @@ addEventListener('mouseup', e => {
 });
 
 addEventListener('dblclick', e => {
-    particlesArray.forEach((particle) => particle.scatter())
+   
+    if (e.offsetY < innerHeight / 4 & e.offsetX > 3*innerWidth/4) {
+       setColors()
+    } else {
+        particlesArray.forEach((particle) => particle.scatter())    
+    }
+
 });
 
 addEventListener(
@@ -135,9 +146,15 @@ addEventListener(
         let now = new Date().getTime();
         let timeSince = now - lastTouch;
  
-        if (timeSince < 300) {
+        if (timeSince < 300) { 
             //double touch
-            particlesArray.forEach((particle) => particle.scatter()) 
+            if (e.touches[0].clientX > innerWidth * 0.75 && e.touches[0].clientY < innerHeight * 0.25){   
+                setColors()
+            } 
+            else{
+                particlesArray.forEach((particle) => particle.scatter()) 
+            }
+            
         }
         lastTouch = new Date().getTime()
         cursor.x = e.touches[0].clientX;
@@ -172,19 +189,21 @@ addEventListener("resize", () => setSize());
 
 function generateParticles(amount) {
     for (let i = 0; i < amount; i++) {
-        particlesArray[i] = new Particle(
-            generateColor(),
-        );
+        particlesArray[i] = new Particle();
     }
 }
+function generateHSLColor(hueWidth, hueStart, value) {
+    // return 'hsl(' + Math.random()*360 + ' , 100%, 50%)';
+    let colorString = 'hsl(' + (Math.random() * hueWidth + hueStart) + ' , 100%, ' + value + '%)'
+    // console.log(colorString)
+    return colorString;
+}
 
-function generateColor() {
-    let hexSet = "0123456789ABCDEF";
-    let finalHexString = "#";
-    for (let i = 0; i < 6; i++) {
-        finalHexString += hexSet[Math.ceil(Math.random() * 15)];
-    }
-    return finalHexString;
+function setColors() {
+    let hueWidth = Math.random() * 360
+    let hueStart = Math.random() * 360
+    let value = Math.random()**2 * 50 + 50
+    particlesArray.forEach((particle) => particle.setColor(generateHSLColor(hueWidth, hueStart, value)))
 }
 
 function setSize() {
@@ -204,17 +223,22 @@ function randn_bm() {
 function anim() {
     requestAnimationFrame(anim);
     context.fillStyle = "rgba(0,0,0,0.05)";
+    // context.fillStyle = "rgba(1,1,1,0.05)";
     context.fillRect(0, 0, canvas.width, canvas.height);
 
     particlesArray.forEach((particle) => particle.move())
     particlesArray.forEach((particle) => particle.draw())
     particlesArray.forEach((particle) => particle.detectEdgeRotate())
-    if ( mouseDown ) {
+    if ( mouseDown )   {
+        let now = new Date().getTime();
+        if (now - lastTouch > 300) { 
         particlesArray.forEach((particle) => particle.trackCursor())
+        }
     }
 }
 
 
 generateParticles(nP);
+setColors()
 setSize();
 anim();
