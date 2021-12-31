@@ -10,11 +10,14 @@ const cursor = {
 
 let lastTouch = new Date().getTime();
 let mouseDown = false
+let lightBG = false
+let bgFillStyle = "rgba(0,0,0,0.05)"
 const nP = 1000
 const dt = 1.0
 const du = 0.1
 const dthmax=0.1
 const edgeWidth = 0.3
+
 
 class Particle {
     constructor() {
@@ -133,7 +136,10 @@ addEventListener('dblclick', e => {
    
     if (e.offsetY < innerHeight / 4 & e.offsetX > 3*innerWidth/4) {
        setColors()
-    } else {
+    } else if (e.offsetY < innerHeight / 4 & e.offsetX < 1 * innerWidth / 4){
+        toggleBG()
+    }
+     else {
         particlesArray.forEach((particle) => particle.scatter())    
     }
 
@@ -150,7 +156,11 @@ addEventListener(
             //double touch
             if (e.touches[0].clientX > innerWidth * 0.75 && e.touches[0].clientY < innerHeight * 0.25){   
                 setColors()
-            } 
+            }
+            else if (e.touches[0].clientX < innerWidth * 0.25 && e.touches[0].clientY < innerHeight * 0.25){
+                toggleBG()
+            }
+            
             else{
                 particlesArray.forEach((particle) => particle.scatter()) 
             }
@@ -211,6 +221,20 @@ function setSize() {
     canvas.width = innerWidth;
 }
 
+function toggleBG() {
+    if (lightBG) {
+        lightBG=false
+        // document.body.style.backgroundColor = "black";
+        bgFillStyle="rgba(0,0,0,0.05)"
+    }
+    else {
+        lightBG = true
+        // document.body.style.backgroundColor = "white";
+        bgFillStyle = "rgba(255,255,255,0.05)"
+    }
+
+}
+
 
 // Standard Normal variate using Box-Muller transform.
 function randn_bm() {
@@ -222,8 +246,7 @@ function randn_bm() {
 
 function anim() {
     requestAnimationFrame(anim);
-    context.fillStyle = "rgba(0,0,0,0.05)";
-    // context.fillStyle = "rgba(1,1,1,0.05)";
+    context.fillStyle = bgFillStyle;
     context.fillRect(0, 0, canvas.width, canvas.height);
 
     particlesArray.forEach((particle) => particle.move())
