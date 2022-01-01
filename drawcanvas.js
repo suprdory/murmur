@@ -7,27 +7,29 @@ const cursor = {
     y: innerHeight / 2,
 };
 
+const nP = 1000
+const dt = 0.7
+const dthmax = 0.2
+const edgeWidth = 0.2
+const darkFillStyle = "rgba(0,0,0,0.050)"
+const lightFillStyle = "rgba(255,255,255,0.050)"
+const alpha = 10
 
 let lastTouch = new Date().getTime();
 let mouseDown = false
 let lightBG = false
-let bgFillStyle = "rgba(0,0,0,0.05)"
-const nP = 1000
-const dt = 1.0
-const du = 0.1
-const dthmax=0.1
-const edgeWidth = 0.3
+let bgFillStyle = darkFillStyle
 
 function toggleBG() {
     if (lightBG) {
         lightBG = false
         // document.body.style.backgroundColor = "black";
-        bgFillStyle = "rgba(0,0,0,0.050)"
+        bgFillStyle = darkFillStyle
     }
     else {
         lightBG = true
         // document.body.style.backgroundColor = "white";
-        bgFillStyle = "rgba(255,255,255,0.050)"
+        bgFillStyle = lightFillStyle
     }
 
 }
@@ -42,13 +44,13 @@ class Particle {
         this.u = this.V*Math.sin(this.theta);
         this.v = this.V*Math.cos(this.theta);
         this.size = 20;
-        this.alpha = 10 * Math.PI / 180;
+        this.alpha = alpha * Math.PI / 180;
         this.fillColor = 0;
         this.theta = Math.atan2(this.v,this.u);
     }
 
     move()  {
-        this.x = this.x + this.u*  dt;
+        this.x = this.x + this.u * dt;
         this.y = this.y + this.v * dt;
         this.theta = Math.atan2(this.u,this.v)
     }
@@ -63,21 +65,6 @@ class Particle {
         context.lineTo(this.x - L*Math.sin(th-a), this.y - L*Math.cos(th-a));
         context.lineTo(this.x - L*Math.sin(th+a), this.y - L*Math.cos(th+a));
         context.fill();
-    }
-
-    detectEdge() {
-        if ( this.x > innerWidth * (1 - edgeWidth)){
-            this.u = this.u-du
-        }
-        if ( this.x < innerWidth * edgeWidth){
-            this.u = this.u + du
-        }
-        if ( this.y > innerHeight * (1 - edgeWidth)){
-            this.v = this.v - du
-        }
-        if ( this.y < innerHeight * edgeWidth){
-            this.v = this.v + du
-        }
     }
         
     detectEdgeRotate() {
@@ -125,6 +112,58 @@ class Particle {
         this.fillColor=newColor
     }
 }
+
+function generateParticles(amount) {
+    for (let i = 0; i < amount; i++) {
+        particlesArray[i] = new Particle();
+    }
+}
+function generateHSLColor(hueWidth, hueStart, valueWidth, valueStart) {
+    // return 'hsl(' + Math.random()*360 + ' , 100%, 50%)';
+    let colorString = 'hsl(' + (Math.random() * hueWidth + hueStart) + ' , 100%, ' + (Math.random() ** 2 * valueWidth + valueStart) + '%)'
+    // console.log(colorString)
+    return colorString;
+}
+
+function setColors() {
+    let hueWidth = Math.random() ** 2 * 360
+    let hueStart = Math.random() * 360
+    let valueStart = 50 + Math.random() ** 2 * 50
+    let valueWidth = Math.random() ** 2 * 50
+    particlesArray.forEach((particle) => particle.setColor(
+        generateHSLColor(hueWidth, hueStart, valueWidth, valueStart)))
+}
+
+function setSize() {
+    canvas.height = innerHeight;
+    canvas.width = innerWidth;
+}
+
+// Standard Normal variate using Box-Muller transform.
+function randn_bm() {
+    var u = 0, v = 0;
+    while (u === 0) u = Math.random(); //Converting [0,1) to (0,1)
+    while (v === 0) v = Math.random();
+    return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+}
+
+function anim() {
+    requestAnimationFrame(anim);
+    context.fillStyle = bgFillStyle;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    particlesArray.forEach((particle) => particle.move())
+    particlesArray.forEach((particle) => particle.draw())
+    particlesArray.forEach((particle) => particle.detectEdgeRotate())
+    if (mouseDown) {
+        let now = new Date().getTime();
+        if (now - lastTouch > 300) {
+            particlesArray.forEach((particle) => particle.trackCursor())
+        }
+    }
+}
+
+
 
 addEventListener('mousedown', e => {
     cursor.x = e.offsetX;
@@ -208,59 +247,12 @@ addEventListener(
 
 addEventListener("resize", () => setSize());
 
-function generateParticles(amount) {
-    for (let i = 0; i < amount; i++) {
-        particlesArray[i] = new Particle();
-    }
-}
-function generateHSLColor(hueWidth, hueStart, valueWidth, valueStart) {
-    // return 'hsl(' + Math.random()*360 + ' , 100%, 50%)';
-    let colorString = 'hsl(' + (Math.random() * hueWidth + hueStart) + ' , 100%, ' + (Math.random() ** 2 * valueWidth + valueStart) + '%)'
-    // console.log(colorString)
-    return colorString;
-}
 
-function setColors() {
-    let hueWidth = Math.random() ** 2 * 360
-    let hueStart = Math.random() * 360
-    let valueStart = 50 + Math.random() ** 2 * 50
-    let valueWidth = Math.random() ** 2 * 50
-    particlesArray.forEach((particle) => particle.setColor(
-        generateHSLColor(hueWidth, hueStart, valueWidth, valueStart)))
-}
-
-function setSize() {
-    canvas.height = innerHeight;
-    canvas.width = innerWidth;
-}
-
-
-// Standard Normal variate using Box-Muller transform.
-function randn_bm() {
-    var u = 0, v = 0;
-    while(u === 0) u = Math.random(); //Converting [0,1) to (0,1)
-    while(v === 0) v = Math.random();
-    return Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
-}
-
-function anim() {
-    requestAnimationFrame(anim);
-    context.fillStyle = bgFillStyle;
-    context.fillRect(0, 0, canvas.width, canvas.height);
-
-    particlesArray.forEach((particle) => particle.move())
-    particlesArray.forEach((particle) => particle.draw())
-    particlesArray.forEach((particle) => particle.detectEdgeRotate())
-    if ( mouseDown )   {
-        let now = new Date().getTime();
-        if (now - lastTouch > 300) { 
-        particlesArray.forEach((particle) => particle.trackCursor())
-        }
-    }
-}
 
 
 generateParticles(nP);
 setColors()
 setSize();
+context.fillStyle = lightFillStyle;
+context.fillRect(0, 0, canvas.width, canvas.height);
 anim();
