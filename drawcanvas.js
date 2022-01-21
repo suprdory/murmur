@@ -19,6 +19,7 @@ let lastTouch = new Date().getTime();
 let mouseDown = false
 let lightBG = false
 let bgFillStyle = darkFillStyle
+let showGuide = true
 
 function toggleBG() {
     if (lightBG) {
@@ -161,11 +162,13 @@ function anim() {
             particlesArray.forEach((particle) => particle.trackCursor())
         }
     }
+    if (showGuide){
+        drawGuide()
+    }
 }
 
-
-
 addEventListener('mousedown', e => {
+    showGuide = false
     cursor.x = e.offsetX;
     cursor.y = e.offsetY;
     mouseDown = true;
@@ -218,6 +221,7 @@ addEventListener(
             }
             
         }
+        showGuide=false
         lastTouch = new Date().getTime()
         cursor.x = e.touches[0].clientX;
         cursor.y = e.touches[0].clientY;
@@ -247,8 +251,28 @@ addEventListener(
 
 addEventListener("resize", () => setSize());
 
+function drawGuide(){
+    context.beginPath()
 
+    context.moveTo(innerWidth / 4, 0)
+    context.lineTo(innerWidth / 4, innerHeight /4)
+    context.lineTo(0, innerHeight / 4)
 
+    context.moveTo(3*innerWidth / 4, 0)
+    context.lineTo(3*innerWidth / 4, innerHeight / 4)
+    context.lineTo(innerWidth, innerHeight / 4)
+    context.font = '48px sans-serif';
+    context.textAlign = 'center'
+    context.textBaseline = 'middle'
+    context.strokeStyle = '#ffffff'
+    context.fillStyle = '#ffffff'
+    context.fillText('Double-tap', innerWidth/2, innerHeight*5/16);
+    context.fillText('Touch + hold', innerWidth / 2, innerHeight * 13 / 16);
+    context.lineWidth = 3
+    context.strokeStyle = '#ffffff'
+    context.setLineDash([10])
+    context.stroke()
+}
 
 generateParticles(nP);
 setColors()
