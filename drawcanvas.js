@@ -185,6 +185,8 @@ addEventListener('mousemove', e => {
   
 addEventListener('mouseup', e => {
     mouseDown = false;
+    hidePriv();
+
 });
 
 addEventListener('dblclick', e => {
@@ -203,7 +205,7 @@ addEventListener('dblclick', e => {
 addEventListener(
     "touchstart",
     (e) => {
-        e.preventDefault();
+        // e.preventDefault();
         let now = new Date().getTime();
         let timeSince = now - lastTouch;
  
@@ -243,13 +245,20 @@ addEventListener(
 addEventListener(
     "touchend",
     (e) => {
-        e.preventDefault();
+        // e.preventDefault();
         mouseDown = false;
+        // hidePriv();
     },
     { passive: false }
 );
 
 addEventListener("resize", () => setSize());
+
+function hidePriv() {
+    let priv = document.getElementById('priv')
+    priv.style.visibility = 'hidden'
+    console.log(priv)
+}
 
 function drawGuide(){
     context.beginPath()
